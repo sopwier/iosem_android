@@ -1,0 +1,53 @@
+name: build
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  debug-apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Publishing guard: firmware, disk images and the unlicensed driver binary
+      # must never enter the repository.
+      - name: Refuse forbidden artifacts
+        run: |
+          if git ls-files | grep -Ei '(^|/)(.*\.ipsw|.*\.dmg|.*\.dmg\.out|aleph_bdev_drv\.bin|hfs\.(main|sec)|kernelcache\.release\..*|DeviceTree\..*\.im4p.*)'; then
+            echo "::error::Apple firmware or aleph_bdev_drv.bin is tracked; refusing to build."
+            exit 1
+          fi
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          # AGP needs a full JDK with jlink; the project is built and tested on 21.
+          java-version: "21"
+
+      - uses: android-actions/setup-android@v3
+
+      - name: Install SDK packages
+        run: |
+          yes | sdkmanager --licenses >/dev/null || true
+          sdkmanager "platforms;android-35" "build-tools;35.0.0" "ndk;26.1.10909125" "cmake;3.22.1"
+
+      - name: Build debug APK
+        run: |
+          chmod +x gradlew
+          ./gradlew :app:assembleDebug --no-daemon --stacktrace
+
+      - name: Note whether the QEMU backend is packaged
+        run: |
+          if compgen -G "app/src/main/jniLibs/*/libqemu-system-aarch64.so" >/dev/null; then
+            echo "QEMU backend present in jniLibs."
+          else
+            echo "::warning::jniLibs is gitignored, so this APK has no QEMU backend. Run host/fetch-android-deps.sh and host/build-qemu-android.sh for a bootable build."
+          fi
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: iosem-debug-apk
+          path: app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error

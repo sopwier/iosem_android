@@ -1,0 +1,44 @@
+iosem bundles the following third-party components in the APK.
+
+QEMU (Aleph Research xnu-qemu-arm64 fork)
+  License: GPL-2.0-or-later. See qemu-GPL-2.0.txt.
+  Source: https://github.com/alephsecurity/xnu-qemu-arm64
+
+GLib, GIO, GObject, GThread (Termux aarch64 build)
+  License: LGPL-2.1-or-later. See LGPL-2.1.txt.
+  Source: https://gitlab.gnome.org/GNOME/glib
+
+libiconv (Termux aarch64 build)
+  License: LGPL-2.1-or-later. See LGPL-2.1.txt.
+  Source: https://www.gnu.org/software/libiconv/
+
+pixman (Termux aarch64 build)
+  License: MIT. See pixman.txt.
+  Source: https://gitlab.freedesktop.org/pixman/pixman
+
+PCRE2 (Termux aarch64 build)
+  License: BSD-3-Clause. See pcre2.txt.
+  Source: https://github.com/PCRE2Project/pcre2
+
+libffi (Termux aarch64 build)
+  License: MIT. See libffi.txt.
+  Source: https://github.com/libffi/libffi
+
+zlib (Termux aarch64 build)
+  License: zlib. See zlib.txt.
+  Source: https://zlib.net/
+
+libandroid-support (Termux build)
+  License: Apache-2.0. See libandroid-support.txt.
+  Source: https://github.com/termux/libandroid-support
+
+libfdt / dtc (Termux build, library portion)
+  License: BSD-2-Clause (libfdt); dtc is GPL-2.0-or-later.
+  Source: https://git.kernel.org/pub/scm/utils/dtc/dtc.git
+
+LLVM libc++ shared runtime
+  License: Apache-2.0 with LLVM exceptions. See android-ndk-libcxx.txt.
+  Source: Android NDK r26b (LLVM project).
+
+The application does not bundle any Apple firmware, kernelcache, device tree,
+ramdisk, iBoot, or userland. Those files remain user-supplied.

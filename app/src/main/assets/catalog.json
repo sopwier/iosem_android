@@ -1,0 +1,130 @@
+[
+  {
+    "id": "xnu-source",
+    "name": "XNU source (12.1)",
+    "summary": "Apple's open-source XNU 4903.221.2, the kernel family used by iOS 12.1.",
+    "detail": "Tag xnu-4903.221.2, distributed under APSL-2.0. This is source, not a bootable kernel. The n66 block-device driver needs headers and symbols from the XNU version that matches your kernelcache.",
+    "kind": "xnu-source",
+    "required": false,
+    "fileName": "xnu-4903.221.2.tar.gz",
+    "license": "APSL-2.0",
+    "approxBytes": 32000000,
+    "source": {
+      "type": "download",
+      "url": "https://github.com/apple-oss-distributions/xnu/archive/refs/tags/xnu-4903.221.2.tar.gz",
+      "sha256": ""
+    }
+  },
+  {
+    "id": "qemu-source",
+    "name": "n66 QEMU source",
+    "summary": "Aleph Research's QEMU fork with the iPhone6splus-n66-s8000 machine.",
+    "detail": "GPL-2.0, pinned commit 2694993f. The host build in host/build-qemu.sh downloads this same archive. Upstream QEMU does not have the machine model. The fork patches the guest kernel in memory; read docs/LEGAL.md.",
+    "kind": "qemu-source",
+    "required": false,
+    "fileName": "xnu-qemu-arm64-2694993f.tar.gz",
+    "license": "GPL-2.0",
+    "approxBytes": 28400000,
+    "source": {
+      "type": "download",
+      "url": "https://github.com/alephsecurity/xnu-qemu-arm64/archive/2694993f9281a8678d519704c3cd29d4c9d39415.tar.gz",
+      "sha256": ""
+    }
+  },
+  {
+    "id": "kernelcache",
+    "name": "Kernelcache (decoded)",
+    "summary": "kernelcache.release.n66.out, the decoded Mach-O kernel from your iOS 12.1 IPSW.",
+    "detail": "The machine loads a decoded Mach-O directly; it does not use iBoot. Decode kernelcache.release.n66 with host/prepare-artifacts.py on a computer. The kernel must be iOS 12.1 build 16B92 because the n66 machine's patch addresses are hard-coded for it.",
+    "kind": "kernelcache",
+    "required": true,
+    "fileName": "kernelcache.release.n66.out",
+    "license": "Apple copyright — user supplied",
+    "approxBytes": 40000000,
+    "source": {
+      "type": "import",
+      "mimeTypes": ["*/*"],
+      "hint": "Output of: host/prepare-artifacts.py --ipsw iPhone_5.5_12.1_16B92_Restore.ipsw"
+    }
+  },
+  {
+    "id": "device-tree",
+    "name": "Device tree (decoded)",
+    "summary": "DeviceTree.n66ap.im4p.out from your iOS 12.1 IPSW.",
+    "detail": "XNU's ARM64 entry point parses Apple's Device Tree, not a standard FDT. The decoded blob describes the n66 memory map, interrupts, timers and UART used by the machine model.",
+    "kind": "device-tree",
+    "required": true,
+    "fileName": "DeviceTree.n66ap.im4p.out",
+    "license": "Apple copyright — user supplied",
+    "approxBytes": 200000,
+    "source": {
+      "type": "import",
+      "mimeTypes": ["*/*"],
+      "hint": "Output of: host/prepare-artifacts.py --ipsw iPhone_5.5_12.1_16B92_Restore.ipsw"
+    }
+  },
+  {
+    "id": "block-driver",
+    "name": "Block-device driver",
+    "summary": "aleph_bdev_drv.bin, compiled against your kernel's symbols.",
+    "detail": "Position-independent kernel code that exposes the two HFS+ images as disk0 and disk1. Build it from xnu-qemu-arm64-tools with a matching XNU source tree and the decoded kernel's symbols; see host/README.md.",
+    "kind": "block-driver",
+    "required": true,
+    "fileName": "aleph_bdev_drv.bin",
+    "license": "Upstream project — no explicit license file; user built",
+    "approxBytes": 30000,
+    "source": {
+      "type": "import",
+      "mimeTypes": ["*/*"],
+      "hint": "aleph_bdev_drv/bin/aleph_bdev_drv.bin built from xnu-qemu-arm64-tools"
+    }
+  },
+  {
+    "id": "main-disk",
+    "name": "Main disk",
+    "summary": "hfs.main, a prepared HFS+ image containing the iOS system volume.",
+    "detail": "The upstream macOS procedure copies the iOS 12.1 system volume into a resized ramdisk, edits fstab and launch daemons, and patches launchd. This is Apple code and must stay local. It is not derivable from an IPSW by this app.",
+    "kind": "main-disk",
+    "required": true,
+    "fileName": "hfs.main",
+    "license": "Apple copyright — user supplied",
+    "approxBytes": 6000000000,
+    "source": {
+      "type": "import",
+      "mimeTypes": ["*/*"],
+      "hint": "hfs.main prepared with the upstream hdiutil procedure; see host/DISKS.md"
+    }
+  },
+  {
+    "id": "secondary-disk",
+    "name": "Secondary disk",
+    "summary": "hfs.sec, the prepared HFS+ image mounted at /private/var.",
+    "detail": "A second disk image built from the same update DMG. The machine exposes it as disk1; the guest fstab mounts it read-write. Losing it or killing QEMU uncleanly can require repairing the HFS+ volume.",
+    "kind": "secondary-disk",
+    "required": true,
+    "fileName": "hfs.sec",
+    "license": "Apple copyright — user supplied",
+    "approxBytes": 6000000000,
+    "source": {
+      "type": "import",
+      "mimeTypes": ["*/*"],
+      "hint": "hfs.sec prepared with the upstream hdiutil procedure; see host/DISKS.md"
+    }
+  },
+  {
+    "id": "ramdisk",
+    "name": "Ramdisk (decoded)",
+    "summary": "048-32651-104.dmg.out, optional for the custom-disk boot path.",
+    "detail": "The decoded restore ramdisk. The n66 command used by this project boots from hfs.main instead, so this is not required. It is useful if you are experimenting with a ramdisk-root boot.",
+    "kind": "ramdisk",
+    "required": false,
+    "fileName": "048-32651-104.dmg.out",
+    "license": "Apple copyright — user supplied",
+    "approxBytes": 100000000,
+    "source": {
+      "type": "import",
+      "mimeTypes": ["*/*"],
+      "hint": "Output of: host/prepare-artifacts.py --ipsw iPhone_5.5_12.1_16B92_Restore.ipsw"
+    }
+  }
+]
